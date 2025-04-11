@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crossword Generator</title>
+    <style>
+	.form-column {
+	    display: inline-block;
+	    margin-right: 10px;
+	}
+    </style>
+</head>
+<body>
+    <h1>Crossword Generator</h1>
+    <form method="POST">
+	<div class="form-column">
+	    <h2>Grid Data</h2>
+	    <textarea name="crossword_data" rows="24" cols="24" placeholder="Crossword data here.">{{ crossword_data }}</textarea>
+	</div>
+        <div class="form-column">
+	    <h2>Clue Data</h2>
+            <textarea name="clue_data" rows="24" cols="52" placeholder="Clue data.">{{ clue_data }}</textarea>
+        </div>
+	<div class="form-column">
+	    <h2>HP</h2>
+	    <textarea name="highlight_data" rows="24" cols="3" placeholder="Highlighted positions.">{{ highlight_data }}</textarea>
+	</div>
+	<div class="form-column">
+	    <h2>Decoration Data</h2>
+	    <textarea name="decor_data" rows="24" cols="7" placeholder="Decoration data.">{{ decor_data }}</textarea>
+	</div>
+	<br>
+
+	<input type="hidden" name="combined_data" id="combined_data">
+	<input type="submit" value="Generate Crossword">
+    </form>
+
+    {% if svg_markup %}
+        <h2>Generated Crossword:</h2>
+	<button id="toggle-words">Toggle Words</button>
+	<br><br>
+	<div id="svg-container">
+            {{ svg_markup|safe }}
+	</div>
+	<br>
+	<a href="{{ url_for('download_svg', file=svg_file) }}">Download SVG</a>
+    {% endif %}
+
+    <h2>Help</h2>
+    <ul>
+        <li>Grid Data - Insert the solution to the crossword, for example:
+<pre>FISH
+AC O
+RENT</pre>
+        </li>
+	<li>
+            Clue Data - Insert the clues, in the format "CellDirectionLength Fontsize Clue", for example "A1H1 10 NOT NEAR"
+	</li>
+	<li>
+            HP - Highlighted positions, for example the solution to the picture-question.
+        </li>
+	<li>
+            Decoration Data - Insert decorations in the format "Cell Decoration", see preloaded example.
+	</li>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+	    let grid = document.querySelector('textarea[name="crossword_data"]').value.replace(/^\n{2,}/, '\n').replace(/\n+$/, '');
+	    let clues = document.querySelector('textarea[name="clue_data"]').value.replace(/^\n+|\n+$/g, '');
+	    let highlights = document.querySelector('textarea[name="highlight_data"]').value.replace(/^\n+|\n+$/g, '');
+	    let decorations = document.querySelector('textarea[name="decor_data"]').value.replace(/^\n+|\n+$/g, '');
+	    document.getElementById('combined_data').value = grid + '\n\n' + clues + '\n\n' + highlights + '\n\n' + decorations;
+
+	});
+
+	{% if svg_markup %}
+	document.addEventListener('DOMContentLoaded', function() {
+	    document.getElementById('toggle-words').addEventListener('click', function() {
+                let wordsLayer = document.querySelector('#svg-container [inkscape\\:label="Words"]');
+		if (wordsLayer) {
+		    wordsLayer.style.display = wordsLayer.style.display === 'none' ? '' : 'none';
+		}
+	    });
+	});
+	{% endif %}
+    </script>
+</body>
+</html>
